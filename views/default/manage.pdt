@@ -1,0 +1,39 @@
+<?php
+        /**
+         * Created by PhpStorm.
+         * User: Luke Hardiman
+         * Date: 15/08/2015
+         * Time: 10:48 PM
+         */
+
+		$this->Widget->clear();
+		$this->Widget->create($this->_("keycdn.manage.box_title", true));
+		?>
+    <div class="inner">
+        <?php
+        $this->Form->create();
+        ?>
+        <div class="title_row first">
+            <h3><?php $this->_("keycdn.manage.basic_title");?></h3>
+        </div>
+        <div class="pad">
+            <ul>
+
+                <li>
+                    <?php
+                    $this->Form->label($this->_("keycdn.row_meta.api_key", true), "api_key");
+                    $this->Form->fieldText("api_key", $this->Html->ifSet($vars->api_username), array('id' => "api_key"));
+                    ?>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="button_row"><a class="btn_right submit" href="#"><?php $this->_("keycdn.manage.add_btn");?></a></div>
+        <?php
+        $this->Form->end();
+        ?>
+    </div>
+<?php
+    $this->Widget->end();
+?>

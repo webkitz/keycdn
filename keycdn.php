@@ -6,7 +6,7 @@
  * Date: 15/08/2015
  * Time: 5:17 PM
  */
-class KeyCDN extends module
+class keycdn extends module
 {
 
     /**
@@ -414,7 +414,17 @@ class KeyCDN extends module
      * @return string HTML content containing information to display when viewing the manager module page
      */
     public function manageModule($module, array &$vars) {
-        return "";
+        // Load the view into this object, so helpers can be automatically added to the view
+        $this->view = new View("manage", "default");
+        $this->view->base_uri = $this->base_uri;
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
+
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+
+
+        $this->view->set("vars", (object)$vars);
+        return $this->view->fetch();
     }
 
     /**
@@ -449,17 +459,81 @@ class KeyCDN extends module
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function addModuleRow(array &$vars) {
-        $meta = array();
-        foreach ($vars as $key => $value) {
-            $meta[] = array(
-                'key'=>$key,
-                'value'=>$value,
-                'encrypted'=>0
-            );
+        $meta_fields = array("api_key");
+        $encrypted_fields = array("api_key");
+
+        //set rules
+        $this->Input->setRules($this->getRowRules($vars));
+
+        // Validate module row
+        if ($this->Input->validates($vars)) {
+            // Build the meta data for this row
+            $meta = array();
+            foreach ($vars as $key => $value) {
+
+                if (in_array($key, $meta_fields)) {
+                    $meta[] = array(
+                        'key' => $key,
+                        'value' => $value,
+                        'encrypted' => in_array($key, $encrypted_fields) ? 1 : 0
+                    );
+                }
+            }
+
+            return $meta;
         }
-        return $meta;
+    }
+    /**
+     * Retrieves a list of rules for validating adding/editing a module row
+     *
+     * @param array $vars A list of input vars
+     * @return array A list of rules
+     */
+    private function getRowRules(array &$vars)
+    {
+        return array(
+            'api_key' => array(
+                'empty' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("keycdn.!error.api_key.empty", true)
+                ),
+                'valid' => array(
+                    'rule' => array(array($this, "validateConnection"), $vars),
+                    'message' => Language::_("keycdn.!error.api_key.invalid", true)
+                )
+            )
+        );
     }
 
+    /**
+     * Validates whether or not the connection details are valid by attempting to fetch
+     * the number of accounts that currently reside on the server
+     *
+     * @param string $api_username The reseller API username
+     * @param array $vars A list of other module row fields including:
+     * 	- api_password The reseller password
+     * 	- sandbox "true" or "false" as to whether sandbox is enabled
+     * @return boolean True if the connection is valid, false otherwise
+     */
+    public function validateConnection($api_username, $vars) {
+        try {
+            $api_key = (isset($vars['api_key']) ? $vars['api_key'] : "");
+
+            $module_row = (object)array('meta' => (object)$vars);
+
+            $this->api($module_row);
+
+            if (!$this->Input->errors())
+                return true;
+
+            // Remove the errors set
+            $this->Input->setErrors(array());
+        } catch (Exception $e) {
+            // Trap any errors encountered, could not validate connection
+        }
+        return false;
+    }
     /**
      * Edits the module row on the remote server. Sets Input errors on failure,
      * preventing the row from being updated.
@@ -632,6 +706,83 @@ class KeyCDN extends module
         return array();
     }
 
+
+
+    private function api($module_row = false)
+    {
+        //singleton
+        if ($this->_api == false) {
+
+            //if module_row was not passed will try retrieve
+            if ($module_row == false || !isset($module_row))
+                $module_row = $this->getModuleRow();
+
+            if (!isset($module_row)) {
+                die ("failed to load api (module row issue)");
+            }
+            //load our api
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "Api.php");
+
+            $this->_api = new keycdn\lib\Api($module_row->meta->api_key);
+
+            /*
+            $this->parseResponse($this->_api->auth(
+                $module_row->meta->api_username,
+                $module_row->meta->api_password
+            ),
+                $module_row);
+            */
+        }
+
+
+        return $this->_api;
+    }
+
+    /**
+     * Parses the response from API into an stdClass object
+     *
+     * @param mixed $response The response from the API
+     * @param stdClass $module_row A stdClass object representing a single reseller (optional, required when Module::getModuleRow() is unavailable)
+     * @param boolean $ignore_error Ignores any response error and returns the response anyway; useful when a response is expected to fail (e.g. check client exists) (optional, default false)
+     * @return stdClass A stdClass object representing the response, void if the response was an error
+     */
+    public function parseResponse($response, $module_row = null, $ignore_error = false)
+    {
+        Loader::loadHelpers($this, array("Html"));
+
+        // Set the module row
+        if (!$module_row)
+            $module_row = $this->getModuleRow();
+
+        $success = true;
+
+        if (empty($response) || !empty($response['error'])) {
+            $success = false;
+            $error = (isset($response['description'])) ? $response['description'] : Language::_("keycdn.!error.api.internal", true);
+
+
+            if (!$ignore_error)
+                $this->Input->setErrors(
+                    array('api' =>
+                        array('internal' =>
+                            $error
+                        )
+                    )
+                );
+            //$this->Input->setErrors(array('errors' => $error));
+
+
+            //$this->Input->setErrors(array('api' => array('internal' => $error)));
+
+        }
+
+        $this->log($module_row->meta->api_username, serialize($response), "output", $success);
+
+        if (!$success && !$ignore_error)
+            return;
+
+        return $response;
+    }
 
 
 
