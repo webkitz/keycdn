@@ -1,0 +1,38 @@
+		<?php
+		$this->Widget->clear();
+		$this->Widget->create($this->_("keycdn.add_row.box_title", true));
+		?>
+		<div class="inner">
+			<?php
+			$this->Form->create();
+			?>
+			<div class="title_row first">
+				<h3><?php $this->_("keycdn.add_row.basic_title");?></h3>
+			</div>
+			<div class="pad">
+				<ul>
+
+					<li>
+						<?php
+						$this->Form->label($this->_("keycdn.row_meta.account_name", true), "account_name");
+						$this->Form->fieldText("account_name", $this->Html->ifSet($vars->account_name), array('id' => "account_name"));
+						?>
+					</li>
+					<li>
+						<?php
+						$this->Form->label($this->_("keycdn.row_meta.api_key", true), "api_key");
+						$this->Form->fieldText("api_key", $this->Html->ifSet($vars->api_key), array('id' => "api_key"));
+						?>
+					</li>
+
+				</ul>
+			</div>
+			
+			<div class="button_row"><a class="btn_right submit" href="#"><?php $this->_("keycdn.add_row.add_btn");?></a></div>
+			<?php
+			$this->Form->end();
+			?>
+		</div>
+		<?php
+		$this->Widget->end();
+		?>

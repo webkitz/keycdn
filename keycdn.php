@@ -12,7 +12,7 @@ class keycdn extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.0";
+    private static $version = "0.1.1";
     /**
      * @var string The authors of this module
      */
@@ -422,8 +422,8 @@ class keycdn extends module
         // Load the helpers required for this view
         Loader::loadHelpers($this, array("Form", "Html", "Widget"));
 
+        $this->view->set("module", $module);
 
-        $this->view->set("vars", (object)$vars);
         return $this->view->fetch();
     }
 
@@ -434,7 +434,17 @@ class keycdn extends module
      * @return string HTML content containing information to display when viewing the add module row page
      */
     public function manageAddRow(array &$vars) {
-        return "";
+        // Load the view into this object, so helpers can be automatically added to the view
+        $this->view = new View("add_row", "default");
+        $this->view->base_uri = $this->base_uri;
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
+
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+
+
+        $this->view->set("vars", (object)$vars);
+        return $this->view->fetch();
     }
 
     /**
@@ -445,7 +455,20 @@ class keycdn extends module
      * @return string HTML content containing information to display when viewing the edit module row page
      */
     public function manageEditRow($module_row, array &$vars) {
-        return "";
+        // Load the view into this object, so helpers can be automatically added to the view
+        $this->view = new View("edit_row", "default");
+        $this->view->base_uri = $this->base_uri;
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
+
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html", "Widget"));
+
+        if (empty($vars))
+            $vars = $module_row->meta;
+
+
+        $this->view->set("vars", (object)$vars);
+        return $this->view->fetch();
     }
 
     /**
@@ -463,8 +486,8 @@ class keycdn extends module
         $encrypted_fields = array("api_key");
 
         //set rules
+        //$this->Input->setRules($this->getRowRules($vars));
         $this->Input->setRules($this->getRowRules($vars));
-
         // Validate module row
         if ($this->Input->validates($vars)) {
             // Build the meta data for this row
@@ -497,11 +520,11 @@ class keycdn extends module
                     'rule' => "isEmpty",
                     'negate' => true,
                     'message' => Language::_("keycdn.!error.api_key.empty", true)
-                ),
+                )/*,
                 'valid' => array(
                     'rule' => array(array($this, "validateConnection"), $vars),
                     'message' => Language::_("keycdn.!error.api_key.invalid", true)
-                )
+                )*/
             )
         );
     }
@@ -517,12 +540,15 @@ class keycdn extends module
      * @return boolean True if the connection is valid, false otherwise
      */
     public function validateConnection($api_username, $vars) {
+
         try {
             $api_key = (isset($vars['api_key']) ? $vars['api_key'] : "");
 
             $module_row = (object)array('meta' => (object)$vars);
 
-            $this->api($module_row);
+            $api = $this->api($module_row);
+            $zones = $api->get('zones.json');
+            print_r($zones);exit;
 
             if (!$this->Input->errors())
                 return true;
@@ -546,15 +572,8 @@ class keycdn extends module
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function editModuleRow($module_row, array &$vars) {
-        $meta = array();
-        foreach ($vars as $key => $value) {
-            $meta[] = array(
-                'key'=>$key,
-                'value'=>$value,
-                'encrypted'=>0
-            );
-        }
-        return $meta;
+        // Same as adding
+        return $this->addModuleRow($vars);
     }
 
     /**
@@ -616,10 +635,12 @@ class keycdn extends module
      * @see Modules::editService()
      */
     public function getEmailTags() {
-        if (isset($this->config->email_tags)) {
-            return (array)$this->config->email_tags;
-        }
-        return array();
+        return array(
+            'module' => array(),
+            'package' => array(),
+            'service' => array()
+        );
+
     }
 
     /**
@@ -721,9 +742,9 @@ class keycdn extends module
                 die ("failed to load api (module row issue)");
             }
             //load our api
-            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "Api.php");
+            //Loader::load(dirname(__FILE__) . DS . "lib" . DS . "Api.php");
 
-            $this->_api = new keycdn\lib\Api($module_row->meta->api_key);
+            //$this->_api = new keycdn\lib\Api($module_row->meta->api_key);
 
             /*
             $this->parseResponse($this->_api->auth(
