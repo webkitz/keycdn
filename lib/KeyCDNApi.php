@@ -11,10 +11,10 @@
  * @author Tobias Moser
  * @version 0.2
  */
-namespace keycdn\lib;
 
 
-class KeyCDN
+
+class KeyCDNApi
 {
     /**
      * @var string

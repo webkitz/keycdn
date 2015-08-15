@@ -22,6 +22,9 @@ $lang['keycdn.row_meta.account_name'] = "Account Name";
 //add module row
 $lang['keycdn.add_row.basic_title'] = "KeyCDN Account Settings";
 $lang['keycdn.add_row.add_btn'] = "Add Account";
+//edit module row
+$lang['keycdn.edit_row.save_button'] = "Save Account";
+
 // manage module row
 $lang['keycdn.manage.box_title'] = "Add KeyCDN API";
 $lang['keycdn.manage.basic_title'] = "Basic Settings";
@@ -31,4 +34,5 @@ $lang['keycdn.manage.add_btn'] = "Save";
 $lang['keycdn.!error.api_key.empty'] = "API key is empty";
 $lang['keycdn.!error.api_key.invalid'] = "API Key is invalid";
 $lang['keycdn.!error.api.internal']= "API Call Error";
+$lang['keycdn.!error.account_name.empty'] = "Account Name is Empty";
 ?>

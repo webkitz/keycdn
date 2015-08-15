@@ -6,6 +6,8 @@
  * Date: 15/08/2015
  * Time: 5:17 PM
  */
+
+
 class keycdn extends module
 {
 
@@ -482,7 +484,7 @@ class keycdn extends module
      * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
      */
     public function addModuleRow(array &$vars) {
-        $meta_fields = array("api_key");
+        $meta_fields = array("api_key","account_name");
         $encrypted_fields = array("api_key");
 
         //set rules
@@ -520,11 +522,18 @@ class keycdn extends module
                     'rule' => "isEmpty",
                     'negate' => true,
                     'message' => Language::_("keycdn.!error.api_key.empty", true)
-                )/*,
+                ),
                 'valid' => array(
                     'rule' => array(array($this, "validateConnection"), $vars),
                     'message' => Language::_("keycdn.!error.api_key.invalid", true)
-                )*/
+                )
+            ),
+            'account_name' => array(
+                'empty' => array(
+                'rule' => "isEmpty",
+                'negate' => true,
+                'message' => Language::_("keycdn.!error.account_name.empty", true)
+                )
             )
         );
     }
@@ -547,8 +556,8 @@ class keycdn extends module
             $module_row = (object)array('meta' => (object)$vars);
 
             $api = $this->api($module_row);
+            //we are just going to pull the zones to check
             $zones = $api->get('zones.json');
-            print_r($zones);exit;
 
             if (!$this->Input->errors())
                 return true;
@@ -742,17 +751,11 @@ class keycdn extends module
                 die ("failed to load api (module row issue)");
             }
             //load our api
-            //Loader::load(dirname(__FILE__) . DS . "lib" . DS . "Api.php");
+            Loader::load(dirname(__FILE__) . DS . "lib" . DS . "KeyCDNApi.php");
 
-            //$this->_api = new keycdn\lib\Api($module_row->meta->api_key);
+            $this->_api = new KeyCDNApi($module_row->meta->api_key);
 
-            /*
-            $this->parseResponse($this->_api->auth(
-                $module_row->meta->api_username,
-                $module_row->meta->api_password
-            ),
-                $module_row);
-            */
+
         }
 
 
@@ -797,7 +800,7 @@ class keycdn extends module
 
         }
 
-        $this->log($module_row->meta->api_username, serialize($response), "output", $success);
+        $this->log($module_row->meta->account_name, serialize($response), "output", $success);
 
         if (!$success && !$ignore_error)
             return;

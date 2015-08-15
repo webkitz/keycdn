@@ -27,7 +27,7 @@ $this->Widget->create($this->_("keycdn.add_row.box_title", true));
 		</ul>
 	</div>
 
-	<div class="button_row"><a class="btn_right submit" href="#"><?php $this->_("keycdn.add_row.add_btn");?></a></div>
+	<div class="button_row"><a class="btn_right submit" href="#"><?php $this->_("keycdn.edit_row.save_button");?></a></div>
 	<?php
 	$this->Form->end();
 	?>
