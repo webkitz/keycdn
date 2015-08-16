@@ -15,19 +15,34 @@
                 array('id'=>"keycdn_purge_url", 'class'=>"form-control"));
             ?>
         </div>
-        <button id="submit_install" class="btn btn-warning pull-right">Purge Cache</button>
-    </div>
+        <div>
+            Purging : <?php echo $purge_url; ?>/<span class="purge_url"></span>
+        </div>
 
+    </div>
+    <button id="submit_install" class="btn btn-warning pull-right disabled">Purge Cache</button>
     <?php $this->Form->end();
-    $this->Form->label($this->_("keycdn.service_field.purge", true), "purge_url");
     ?>
 
     <!--Include our javascript file !-->
     <script type='text/javascript'>
     var purge_url = '<?php echo $purge_url; ?>';
     $(document).ready(function(){
-        //purge_url
-        console.log("purge_url",purge_url)
+
+        $("#keycdn_purge_url").keyup(function (e) {
+            if ($.trim($("#keycdn_purge_url").val()).length > 0){
+                $(".purge_url").text($("#keycdn_purge_url").val())
+
+                if ($("#submit_install").hasClass("disabled"))
+                    $("#submit_install").removeClass("disabled");
+
+            }else{
+                $("#submit_install").addClass("disabled");
+                $(".purge_url").text();
+            }
+
+        });
+
     })
 
     </script>

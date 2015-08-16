@@ -4,4 +4,5 @@ KeyCDN version 1.1.0
 
 [**KeyCDN**](https://www.keycdn.com) is a Content Delivery Network (CDN) service
 
-##please do not install yet.
+KeyCDN Blesta module allows clients to purge urls and configure there cdn service based on there domain.
+-Still in development stage.
