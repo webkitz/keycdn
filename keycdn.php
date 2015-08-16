@@ -5,6 +5,14 @@
  * User: Luke Hardiman
  * Date: 15/08/2015
  * Time: 5:17 PM
+ * KeyCDN Module
+ *
+ * @package blesta
+ * @subpackage blesta.components.modules.keycdn
+ * @author Luke Hardiman, Webkits
+ * @copyright Copyright (c) 2015, Luke Hardiman
+ * @license https://raw.githubusercontent.com/webkitz/keycdn/master/LICENSE
+ * @link http://webkits.co.nz
  */
 
 
@@ -14,7 +22,7 @@ class keycdn extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.1";
+    private static $version = "0.1.2";
     /**
      * @var string The authors of this module
      */
@@ -86,9 +94,11 @@ class keycdn extends module
      * @return string A value used to identify this service amongst other similar services
      */
     public function getServiceName($service) {
-        if (isset($vars['keycdn_name']))
-            return $vars['keycdn_name'];
-        return null;
+        foreach ($service->fields as $field) {
+            if ($field->key == "keycdn_domain")
+                return $field->value;
+        }
+        return "New";
     }
 
     /**
@@ -125,7 +135,7 @@ class keycdn extends module
      * @return string The key used to identify the primary field from the set of module row meta fields
      */
     public function moduleRowMetaKey() {
-        return "keycdn_name";
+        return "account_name";
     }
 
     /**
@@ -177,8 +187,8 @@ class keycdn extends module
      * @see Module::getServiceName()
      */
     public function getPackageServiceName($packages, array $vars=null) {
-        if (isset($vars['keycdn_name']))
-            return $vars['keycdn_name'];
+        if (isset($vars['account_name']))
+            return $vars['account_name'];
         return null;
     }
 
@@ -627,7 +637,31 @@ class keycdn extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getPackageFields($vars=null) {
-        return new ModuleFields();
+        Loader::loadHelpers($this, array("Form", "Html"));
+
+        $fields = new ModuleFields();
+
+        $row = null;
+        if (isset($vars->module_group) && $vars->module_group == "") {
+            if (isset($vars->module_row) && $vars->module_row > 0) {
+                $row = $this->getModuleRow($vars->module_row);
+            } else {
+                $rows = $this->getModuleRows();
+                if (isset($rows[0]))
+                    $row = $rows[0];
+                unset($rows);
+            }
+        } else {
+            // Fetch the 1st server from the list of servers in the selected group
+            $rows = $this->getModuleRows($vars->module_group);
+
+            if (isset($rows[0]))
+                $row = $rows[0];
+            unset($rows);
+        }
+
+
+        return $fields;
     }
 
     /**
