@@ -108,6 +108,7 @@ class KeyCDNApi
      */
     private function execute($selectedCall, $methodType, array $params) {
         $endpoint = rtrim($this->endpoint, '/') . '/' . ltrim($selectedCall, '/');
+
         // start with curl and prepare accordingly
         $ch = curl_init();
         // create basic auth information

@@ -200,7 +200,19 @@ class keycdn extends module
      * @return boolean True if the service validates, false otherwise. Sets Input errors when false.
      */
     public function validateService($package, array $vars=null) {
-        return true;
+        // Set rules
+        $rules = array(
+            'keycdn_domain' => array(
+                'format' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("keycdn.!error.domain.format", true)
+                )
+            )
+        );
+
+        $this->Input->setRules($rules);
+        return $this->Input->validates($vars);
     }
 
     /**
@@ -224,14 +236,69 @@ class keycdn extends module
      * @see Module::getModuleRow()
      */
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
+        //moved to manually adding service for now
         return array(
             //approval rows
             array(
+                'key' => "keycdn_name",   //domain holder for this cdn
+                'value' => $vars['keycdn_name'],
+                'encrypted' => 0
+            ),
+            array(
                 'key' => "keycdn_domain",   //domain holder for this cdn
+                'value' => $vars['keycdn_domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_zone_id",   //zone id
                 'value' => '',
                 'encrypted' => 0
             )
         );
+        /*&
+        //validate service
+        $this->validateService($package, $vars);
+
+        //create zone on keycdn
+        $row = $this->getModuleRow($package->module_row);
+        $api = $this->api($row);
+
+        $zone_details = array(
+            'name' => $vars['keycdn_name'],
+            'originurl' => 'http://'.$vars['keycdn_domain'],
+            'type' => 'pull'
+        );
+        $response = $api->post('zones.json',$zone_details);
+
+        //lets check for errors and return if so
+        $result = $this->parseResponse($response, $row);
+
+        if ($this->Input->errors())
+            return;
+
+
+        //get the zone_id
+        //$zone_id = $result->data->zone->id;
+
+        return array(
+            //approval rows
+            array(
+                'key' => "keycdn_name",   //domain holder for this cdn
+                'value' => $vars['keycdn_name'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_domain",   //domain holder for this cdn
+                'value' => $vars['keycdn_domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_zone_id",   //zone id
+                'value' => '14932',
+                'encrypted' => 0
+            )
+        );
+        */
     }
 
     /**
@@ -692,9 +759,9 @@ class keycdn extends module
      */
     public function getEmailTags() {
         return array(
-            'module' => array(),
-            'package' => array(),
-            'service' => array()
+            'module' => array("keycdn_domain"),
+            'package' => array("keycdn_domain"),
+            'service' => array("keycdn_domain")
         );
 
     }
@@ -718,6 +785,8 @@ class keycdn extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getClientAddFields($package, $vars=null) {
+        //for now we are manually adding this packahe in so will not be requesting any client fields
+        return new ModuleFields();
         Loader::loadHelpers($this, array("Form", "Html"));
         //We are just going to get domain name we want CDN service for
         $fields = new ModuleFields();
@@ -734,10 +803,17 @@ class keycdn extends module
 			</script>
 		");
         //create client form
+        //keycdn_name
+        $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
+        $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($vars->keycdn_name), array('id' => "keycdn_name")));
+        $fields->setField($keycdn_name);
+        //domain name
         $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
         $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($vars->keycdn_domain), array('id' => "keycdn_domain")));
         $fields->setField($keycdn_domain);
+        //unset
         unset($keycdn_domain);
+        unset($keycdn_name);
 
         return $fields;
     }
@@ -848,7 +924,7 @@ class keycdn extends module
 
         $success = true;
 
-        if (empty($response) || !empty($response['error'])) {
+        if (empty($response) || !empty($response['error']) || (!empty($response['status'])) && $response['status'] == "error") {
             $success = false;
             $error = (isset($response['description'])) ? $response['description'] : Language::_("keycdn.!error.api.internal", true);
 

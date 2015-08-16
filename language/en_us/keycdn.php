@@ -36,10 +36,13 @@ $lang['keycdn.!error.api_key.empty'] = "API key is empty";
 $lang['keycdn.!error.api_key.invalid'] = "API Key is invalid";
 $lang['keycdn.!error.api.internal']= "API Call Error";
 $lang['keycdn.!error.account_name.empty'] = "Account Name is Empty";
+$lang['keycdn.!error.domain.format'] = "Incorrect Domain Format";
 
 // Common languages
 $lang['keycdn.common.please_select'] = "-- Please Select --";
 
 //service_field
-$lang['keycdn.service_field.domain'] = "Domain name for CDN"
+$lang['keycdn.service_field.domain'] = "Domain name for CDN or URL";
+$lang['keycdn.service_field.name'] = "Name for CDN (for your reference)";
+
 ?>
