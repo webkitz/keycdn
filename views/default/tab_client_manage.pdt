@@ -1,0 +1,38 @@
+
+	<?php
+	$this->Form->create($this->base_uri . "services/manage/" . $this->Html->ifSet($service_id) . "/tabClientManage/",array('id' => 'tabClientManage'));
+	?>
+    <div id="blestaLoader"></div>
+
+    <div id="csr_content" class="form-group">
+        <div class="form-group">
+            <?php
+
+            $this->Form->fieldHidden("keycdn_purge","true");
+            $this->Form->label($this->_("keycdn.service_field.purge", true), "keycdn_purge_url");
+            $this->Form->fieldText("keycdn_purge_url",
+                $this->Html->ifSet($vars->keycdn_purge_url),
+                array('id'=>"keycdn_purge_url", 'class'=>"form-control"));
+            ?>
+        </div>
+        <button id="submit_install" class="btn btn-warning pull-right">Purge Cache</button>
+    </div>
+
+    <?php $this->Form->end();
+    $this->Form->label($this->_("keycdn.service_field.purge", true), "purge_url");
+    ?>
+
+    <!--Include our javascript file !-->
+    <script type='text/javascript'>
+    var purge_url = '<?php echo $purge_url; ?>';
+    $(document).ready(function(){
+        //purge_url
+        console.log("purge_url",purge_url)
+    })
+
+    </script>
+
+
+
+
+

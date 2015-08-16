@@ -877,11 +877,68 @@ class keycdn extends module
      * 		array('methodName' => array('name' => "Title", 'icon' => "icon"))
      */
     public function getClientTabs($package) {
-        return array();
+        return array(
+            'tabClientManage' => array('name' => Language::_("keycdn.tab.client.manage", true), 'icon' => "fa fa-chain-broken"),
+            'tabClientStats' => array('name' => Language::_("keycdn.tab.client.stats", true), 'icon' => "fa fa-file-text-o"),
+        );
     }
 
+    /**
+     * Client Manage tab
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function tabClientManage($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+
+        $row = $this->getModuleRow($package->module_row);
+
+        if (isset($postRequest["keycdn_purge"]) && isset($postRequest["keycdn_purge_url"])) {
+            print_r($postRequest);exit;
+        }
+        $this->view = new View("tab_client_manage", "default");
+
+        $this->view->base_uri = $this->base_uri;
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html"));
+
+        //Get the service fields
+        /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
+        $service_fields = $this->serviceFieldsToObject($service->fields);
 
 
+        //pass requirements to view
+        $this->view->set("service_id", $service->id);
+        $this->view->set("purge_url",$service_fields->keycdn_domain);
+        $this->view->set("view", $this->view->view);
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
+
+        return $this->view->fetch();
+    }
+    /**
+     * Client Stats tab
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function tabClientStats($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        $this->view->base_uri = $this->base_uri;
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html"));
+        //Get the service fields
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+        $row = $this->getModuleRow($package->module_row);
+    }
     private function api($module_row = false)
     {
         //singleton
