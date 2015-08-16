@@ -22,7 +22,7 @@ class keycdn extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.2";
+    private static $version = "0.1.3";
     /**
      * @var string The authors of this module
      */
@@ -224,7 +224,14 @@ class keycdn extends module
      * @see Module::getModuleRow()
      */
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
-        return array();
+        return array(
+            //approval rows
+            array(
+                'key' => "keycdn_domain",   //domain holder for this cdn
+                'value' => '',
+                'encrypted' => 0
+            )
+        );
     }
 
     /**
@@ -246,6 +253,12 @@ class keycdn extends module
     public function editService($package, $service, array $vars=array(), $parent_package=null, $parent_service=null) {
         return null;
     }
+
+
+
+
+
+
 
     /**
      * Cancels the service on the remote server. Sets Input errors on failure,
@@ -705,7 +718,28 @@ class keycdn extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getClientAddFields($package, $vars=null) {
-        return new ModuleFields();
+        Loader::loadHelpers($this, array("Form", "Html"));
+        //We are just going to get domain name we want CDN service for
+        $fields = new ModuleFields();
+
+        $fields->setHtml("
+			<script type=\"text/javascript\">
+                $(document).ready(function() {
+                    $('#gogetssl_fqdn').change(function() {
+						var form = $(this).closest('form');
+						$(form).append('<input type=\"hidden\" name=\"refresh_fields\" value=\"true\">');
+						$(form).submit();
+					});
+                });
+			</script>
+		");
+        //create client form
+        $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
+        $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($vars->keycdn_domain), array('id' => "keycdn_domain")));
+        $fields->setField($keycdn_domain);
+        unset($keycdn_domain);
+
+        return $fields;
     }
 
     /**
