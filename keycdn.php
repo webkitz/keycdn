@@ -878,43 +878,26 @@ class keycdn extends module
      */
     public function tabAdminSettings($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
     {
-        //get the service
+        $row = $this->getModuleRow($package->module_row);
+
+
+        $this->view = new View("tab_admin_manage", "default");
+
+        $this->view->base_uri = $this->base_uri;
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Form", "Html"));
+
+        //Get the service fields
+        /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
-        Loader::loadHelpers($this, array("Form", "Html"));
-        //We are just going to get domain name we want CDN service for
-        $fields = new ModuleFields();
-        /*
-        $fields->setHtml("
-			<script type=\"text/javascript\">
-                $(document).ready(function() {
-                    $('#keycdn_domain').change(function() {
-						var form = $(this).closest('form');
-						$(form).append('<input type=\"hidden\" name=\"refresh_fields\" value=\"true\">');
-						$(form).submit();
-					});
-                });
-			</script>
-		");*/
-        //admin form
-        $keycdn_zone_id = $fields->label(Language::_("keycdn.service_field.zone_id", true), "keycdn_zone_id");
-        $keycdn_zone_id->attach($fields->fieldText("keycdn_zone_id", $this->Html->ifSet($service_fields->keycdn_zone_id), array('id' => "keycdn_zone_id")));
-        $fields->setField($keycdn_zone_id);
 
-        //keycdn_name
-        $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
-        $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($service_fields->keycdn_name), array('id' => "keycdn_name")));
-        $fields->setField($keycdn_name);
-        //domain name
-        $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
-        $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($service_fields->keycdn_domain), array('id' => "keycdn_domain")));
-        $fields->setField($keycdn_domain);
-        //unset
-        unset($keycdn_domain);
-        unset($keycdn_name);
-        unset($keycdn_zone_id);
+        //pass requirements to view
+        $this->view->set("client", $service_fields);
+        $this->view->set("view", $this->view->view);
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
 
-        return $fields;
+        return $this->view->fetch();
     }
     /**
      * Returns all tabs to display to a client when managing a service whose

@@ -1,0 +1,47 @@
+
+	<?php
+	$this->Form->create($this->base_uri . "services/manage/" . $this->Html->ifSet($service_id) . "/tabClientManage/",array('id' => 'tabClientManage'));
+	?>
+    <div id="blestaLoader"></div>
+
+    <div id="csr_content" class="form-group">
+        <div class="form-group">
+            <?php
+            //zone
+            $this->Form->label($this->_("keycdn.service_field.zone_id", true), "keycdn_zone_id");
+            $this->Form->fieldText("keycdn_zone_id",
+                $this->Html->ifSet($client->keycdn_zone_id),
+                array('id'=>"keycdn_zone_id", 'class'=>"form-control"));
+
+            //zone name
+            $this->Form->label($this->_("keycdn.service_field.name", true), "keycdn_name");
+            $this->Form->fieldText("keycdn_name",
+                $this->Html->ifSet($client->keycdn_name),
+                array('id'=>"keycdn_name", 'class'=>"form-control"));
+            //domain/purge url
+            $this->Form->label($this->_("keycdn.service_field.purge", true), "keycdn_domain");
+            $this->Form->fieldText("keycdn_domain",
+                $this->Html->ifSet($client->keycdn_domain),
+                array('id'=>"keycdn_domain", 'class'=>"form-control"));
+
+            ?>
+        </div>
+
+
+    </div>
+    <button id="update_account" class="disabled">Update Account</button>
+    <?php $this->Form->end();
+    ?>
+
+    <!--Include our javascript file !-->
+    <script type='text/javascript'>
+
+    $(document).ready(function(){
+
+    });
+    </script>
+
+
+
+
+
