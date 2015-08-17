@@ -45,9 +45,13 @@ $lang['keycdn.common.please_select'] = "-- Please Select --";
 $lang['keycdn.service_field.domain'] = "Domain name for CDN or URL";
 $lang['keycdn.service_field.name'] = "Name for CDN (for your reference)";
 $lang['keycdn.service_field.purge'] = "Purge URL";
+$lang['keycdn.service_field.zone_id'] = "Zone ID";
 
 //client tabs
 $lang['keycdn.tab.client.manage'] = "Manage CDN";
 $lang['keycdn.tab.client.stats'] = "CDN Stats";
+
+//admin tabs
+$lang['keycdn.tab.admin.settings'] = "CDN Settings";
 
 ?>

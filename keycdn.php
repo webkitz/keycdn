@@ -790,18 +790,18 @@ class keycdn extends module
         Loader::loadHelpers($this, array("Form", "Html"));
         //We are just going to get domain name we want CDN service for
         $fields = new ModuleFields();
-
+        /*
         $fields->setHtml("
 			<script type=\"text/javascript\">
                 $(document).ready(function() {
-                    $('#gogetssl_fqdn').change(function() {
+                    $('#keycdn_domain').change(function() {
 						var form = $(this).closest('form');
 						$(form).append('<input type=\"hidden\" name=\"refresh_fields\" value=\"true\">');
 						$(form).submit();
 					});
                 });
 			</script>
-		");
+		");*/
         //create client form
         //keycdn_name
         $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
@@ -860,10 +860,62 @@ class keycdn extends module
      * @param stdClass $package A stdClass object representing the selected package
      * @return array An array of tabs in the format of method => title. Example: array('methodName' => "Title", 'methodName2' => "Title2")
      */
-    public function getAdminTabs($package) {
-        return array();
+    public function getAdminTabs($package)
+    {
+        return array(
+            'tabAdminSettings' => Language::_("keycdn.tab.admin.settings", true)
+        );
     }
+    /**
+     * Admin Settings tab
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function tabAdminSettings($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        //get the service
+        $service_fields = $this->serviceFieldsToObject($service->fields);
 
+        Loader::loadHelpers($this, array("Form", "Html"));
+        //We are just going to get domain name we want CDN service for
+        $fields = new ModuleFields();
+        /*
+        $fields->setHtml("
+			<script type=\"text/javascript\">
+                $(document).ready(function() {
+                    $('#keycdn_domain').change(function() {
+						var form = $(this).closest('form');
+						$(form).append('<input type=\"hidden\" name=\"refresh_fields\" value=\"true\">');
+						$(form).submit();
+					});
+                });
+			</script>
+		");*/
+        //admin form
+        $keycdn_zone_id = $fields->label(Language::_("keycdn.service_field.zone_id", true), "keycdn_zone_id");
+        $keycdn_zone_id->attach($fields->fieldText("keycdn_zone_id", $this->Html->ifSet($service_fields->keycdn_zone_id), array('id' => "keycdn_zone_id")));
+        $fields->setField($keycdn_zone_id);
+
+        //keycdn_name
+        $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
+        $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($service_fields->keycdn_name), array('id' => "keycdn_name")));
+        $fields->setField($keycdn_name);
+        //domain name
+        $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
+        $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($service_fields->keycdn_domain), array('id' => "keycdn_domain")));
+        $fields->setField($keycdn_domain);
+        //unset
+        unset($keycdn_domain);
+        unset($keycdn_name);
+        unset($keycdn_zone_id);
+
+        return $fields;
+    }
     /**
      * Returns all tabs to display to a client when managing a service whose
      * package uses this module
