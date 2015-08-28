@@ -878,6 +878,10 @@ class keycdn extends module
      */
     public function tabAdminSettings($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
     {
+
+        if (isset($postRequest) && count($postRequest) > 0){
+            print_r($postRequest);exit;
+        }
         $row = $this->getModuleRow($package->module_row);
 
 
@@ -893,6 +897,7 @@ class keycdn extends module
 
 
         //pass requirements to view
+        $this->view->set("service", $service);
         $this->view->set("client", $service_fields);
         $this->view->set("view", $this->view->view);
         $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);

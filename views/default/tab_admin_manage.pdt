@@ -1,6 +1,6 @@
 
 	<?php
-	$this->Form->create($this->base_uri . "services/manage/" . $this->Html->ifSet($service_id) . "/tabClientManage/",array('id' => 'tabClientManage'));
+	$this->Form->create($this->base_uri . "clients/servicetab/" . $this->Html->ifSet($service->client_id) . "/" . $this->Html->ifSet($service->id) . "/tabAdminSettings/",array('id' => 'tabAdminManage'));
 	?>
     <div id="blestaLoader"></div>
 
