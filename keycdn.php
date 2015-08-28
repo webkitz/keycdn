@@ -208,6 +208,20 @@ class keycdn extends module
                     'negate' => true,
                     'message' => Language::_("keycdn.!error.domain.format", true)
                 )
+            ),
+            'keycdn_name' => array(
+                'format' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("keycdn.!error.account_name.empty", true)
+                )
+            ),
+            'keycdn_zone_id' => array(
+                'format' => array(
+                    'rule' => "isEmpty",
+                    'negate' => true,
+                    'message' => Language::_("keycdn.!error.zone_id.empty", true)
+                )
             )
         );
 
@@ -318,12 +332,62 @@ class keycdn extends module
      * @see Module::getModuleRow()
      */
     public function editService($package, $service, array $vars=array(), $parent_package=null, $parent_service=null) {
-        return null;
+        // Load the API
+        $module_row = $this->getModuleRow();
+
+        // Validate the service-specific fields
+        $this->validateService($package, $vars, true);
+
+        if ($this->Input->errors())
+            return;
+
+
+        // Get the service fields
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        // Only provision the service if 'use_module' is true
+        if ($vars['use_module'] == "true") {
+            // Nothing to do
+        }
+
+        // Return all the service fields
+       return $this->ourServiceFields($vars);
     }
 
 
+    /**
+     *
+     * @param $serviceFromVar n array of user supplied info to satisfy the request
+     * @return array A numerically indexed array of meta fields to be stored for this service containing:
+     * 	- key The key for this meta field
+     * 	- value The value for this key
+     * 	- encrypted Whether or not this field should be encrypted (default 0, not encrypted)
+     * @see Module::getModule()
+     * @see Module::getModuleRow()
+     * @todo need to verify or validate service here not safe to return back from $vars
+     */
+    private function ourServiceFields($serviceFromVar)
+    {
+        Loader::loadHelpers($this, array("Html"));
 
-
+        return array(
+            array(
+                'key' => "keycdn_domain",
+                'value' => $serviceFromVar['keycdn_domain'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_name",
+                'value' => $serviceFromVar['keycdn_name'],
+                'encrypted' => 0
+            ),
+           array(
+               'key' => "keycdn_zone_id",
+               'value' => $serviceFromVar['keycdn_zone_id'],
+               'encrypted' => 0
+           )
+        );
+    }
 
 
 
@@ -880,9 +944,28 @@ class keycdn extends module
     {
 
         if (isset($postRequest) && count($postRequest) > 0){
-            print_r($postRequest);exit;
-        }
-        $row = $this->getModuleRow($package->module_row);
+                //preload service
+                Loader::loadModels($this, array("Services"));
+                //setup vars to pass
+                $vars = array(
+                    'use_module' => true,
+                    'client_id' => $service->client_id,
+                    'keycdn_domain' => $postRequest['keycdn_domain'],
+                    'keycdn_name' => $postRequest['keycdn_name'],
+                    'keycdn_zone_id' => $postRequest['keycdn_zone_id']
+                );
+                //check service
+                $updated_details = $this->editService($package, $service, $vars);
+
+                //make sure no errors and save
+                if (!$this->Input->errors())
+                    $this->Services->setFields($service->id, $updated_details);
+                else
+                    unset($updated_details);    //we had error do not want to pass any details to view
+
+
+            }
+        //$row = $this->getModuleRow($package->module_row);
 
 
         $this->view = new View("tab_admin_manage", "default");
@@ -893,7 +976,8 @@ class keycdn extends module
 
         //Get the service fields
         /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
-        $service_fields = $this->serviceFieldsToObject($service->fields);
+        //pass any updated details that were confirmed from editService
+        $service_fields = $this->serviceFieldsToObject((isset($updated_details))?$updated_details : $service->fields);
 
 
         //pass requirements to view

@@ -37,13 +37,15 @@ $lang['keycdn.!error.api_key.invalid'] = "API Key is invalid";
 $lang['keycdn.!error.api.internal']= "API Call Error";
 $lang['keycdn.!error.account_name.empty'] = "Account Name is Empty";
 $lang['keycdn.!error.domain.format'] = "Incorrect Domain Format";
+$lang['keycdn.!error.zone_id.empty'] = "Zone ID is Empty";
+
 
 // Common languages
 $lang['keycdn.common.please_select'] = "-- Please Select --";
 
 //service_field
-$lang['keycdn.service_field.domain'] = "Domain name for CDN or URL";
-$lang['keycdn.service_field.name'] = "Name for CDN (for your reference)";
+$lang['keycdn.service_field.domain'] = "Domain name for CDN or ORGIN URL";
+$lang['keycdn.service_field.name'] = "Zone Name (for your reference)";
 $lang['keycdn.service_field.purge'] = "Purge URL";
 $lang['keycdn.service_field.zone_id'] = "Zone ID";
 

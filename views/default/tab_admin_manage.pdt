@@ -19,7 +19,7 @@
                 $this->Html->ifSet($client->keycdn_name),
                 array('id'=>"keycdn_name", 'class'=>"form-control"));
             //domain/purge url
-            $this->Form->label($this->_("keycdn.service_field.purge", true), "keycdn_domain");
+            $this->Form->label($this->_("keycdn.service_field.domain", true), "keycdn_domain");
             $this->Form->fieldText("keycdn_domain",
                 $this->Html->ifSet($client->keycdn_domain),
                 array('id'=>"keycdn_domain", 'class'=>"form-control"));
