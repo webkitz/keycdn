@@ -9,10 +9,10 @@
             <?php
 
             $this->Form->fieldHidden("keycdn_purge","true");
-            $this->Form->label($this->_("keycdn.service_field.purge", true), "keycdn_purge_url");
+            $this->Form->label($purge_url, "keycdn_purge_url");
             $this->Form->fieldText("keycdn_purge_url",
                 $this->Html->ifSet($vars->keycdn_purge_url),
-                array('id'=>"keycdn_purge_url", 'class'=>"form-control"));
+                array('id'=>"keycdn_purge_url", 'class'=>"form-control ","style" => "display:inline;width:60%"));
             ?>
         </div>
         <div>
