@@ -16,7 +16,7 @@
             ?>
         </div>
         <div>
-            Purging : <?php echo $purge_url; ?>/<span class="purge_url"></span>
+            Purging : <a id="click_test" href="#"><?php echo $purge_url; ?><span class="purge_url"></span></a>
         </div>
 
     </div>
@@ -42,6 +42,11 @@
             }
 
         });
+        //render click in new window
+        $("#click_test").click(function(){
+            window.open( "http://"+purge_url + $(".purge_url").text());
+            return false;
+        })
 
     })
 
