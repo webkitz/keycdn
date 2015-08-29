@@ -258,7 +258,7 @@ class keycdn extends module
      * @see Module::getModuleRow()
      */
     //@todo need to add pending|admin adding check currently auto provisions
-    
+
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
         //moved to manually adding service for now
 
@@ -312,10 +312,10 @@ class keycdn extends module
         );
 
         //create zone
-        //$response = $api->post('zones.json',$zone_details);
+        $response = $api->post('zones.json',$zone_details);
 
         //lets check for errors and return if so
-        //$result = $this->parseResponse($response, $row);
+        $result = $this->parseResponse($response, $row);
 
         if ($this->Input->errors())
             return;
@@ -346,6 +346,11 @@ class keycdn extends module
             array(
                 'key' => "keycdn_zone_id",   //zone id
                 'value' => $vars['keycdn_zone_id'],
+                'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_zone_url",   //zone url @todo put the zone ending eg.-1015.kxcdn.com in the api_key admin section
+                'value' => 'http://'.$vars['keycdn_name'].'-1015.kxcdn.com',
                 'encrypted' => 0
             )
         );
@@ -1071,10 +1076,27 @@ class keycdn extends module
     public function tabClientManage($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
     {
 
-        $row = $this->getModuleRow($package->module_row);
 
-        if (isset($postRequest["keycdn_purge"]) && isset($postRequest["keycdn_purge_url"])) {
-            print_r($postRequest);exit;
+
+        //Get the service fields
+        /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+
+        if (isset($postRequest["keycdn_purge_url"]) && !empty($postRequest["keycdn_purge_url"])) {
+
+            //lets try purge url
+            $row = $this->getModuleRow($package->module_row);
+            $api = $this->api($row);
+
+            //keycdn_zone_url
+            $purged_url = array(
+                'path' => $this->purgeURL($service_fields,$postRequest["keycdn_purge_url"])
+            );
+
+            $response = $api->delete('zones/purgeurl/'.$service_fields->keycdn_zone_id.'.json',   $purged_url);
+            $result = $this->parseResponse($response, $row);
+
         }
         $this->view = new View("tab_client_manage", "default");
 
@@ -1082,14 +1104,15 @@ class keycdn extends module
         // Load the helpers required for this view
         Loader::loadHelpers($this, array("Form", "Html"));
 
-        //Get the service fields
-        /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-
 
         //pass requirements to view
         $this->view->set("service_id", $service->id);
+
+        $this->view->set("purged_url", (isset($purged_url))?$purged_url:"");
+
+
         //trim the cdn domain and add slash
+        $this->view->set("zone_url",    rtrim($service_fields->keycdn_zone_url, '/') . '/');
         $this->view->set("purge_url",   rtrim($service_fields->keycdn_domain, '/') . '/');
         $this->view->set("view", $this->view->view);
         $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
@@ -1140,6 +1163,8 @@ class keycdn extends module
     }
 
     /**
+     * Renders a keycdn name from a domain name
+     *
      * @param $domain domain name or possible url
      * @return string safe string as keycdn name as refrence
      */
@@ -1152,6 +1177,8 @@ class keycdn extends module
     }
 
     /**
+     * returns a zone id from a keyCDN zonelist
+     *
      * @param $response | response from keycdn get->list of all zones
      * @param $keyCDNName | name we are locating the id
      * @return bool | int , returns false if value not found or the id of the zone.
@@ -1165,6 +1192,17 @@ class keycdn extends module
             }
 
         return false;
+    }
+
+    /**
+     * Cleans up the url for keycdn
+     *
+     * @param $service_fields
+     * @param $url  the url relative eg /images.jpg
+     * @return string keycdn valid url
+     */
+    private function purgeURL($service_fields,$url){
+        return (rtrim(preg_replace('#^https?://#', '', $service_fields->keycdn_zone_url), '/') . '/').$url;
     }
     /**
      * Parses the response from API into an stdClass object

@@ -7,16 +7,16 @@
     <div id="csr_content" class="form-group">
         <div class="form-group">
             <?php
-
-            $this->Form->fieldHidden("keycdn_purge","true");
-            $this->Form->label($purge_url, "keycdn_purge_url");
+        
+            $this->Form->fieldHidden("keycdn_zone_url","true");
+            $this->Form->label($purge_url, "keycdn_purge");
             $this->Form->fieldText("keycdn_purge_url",
                 $this->Html->ifSet($vars->keycdn_purge_url),
                 array('id'=>"keycdn_purge_url", 'class'=>"form-control ","style" => "display:inline;width:60%"));
             ?>
         </div>
         <div>
-            Purging : <a id="click_test" href="#"><?php echo $purge_url; ?><span class="purge_url"></span></a>
+            Purging : <a id="click_test" href="#"><?php echo $zone_url; ?><span class="purge_url"></span></a>
         </div>
 
     </div>
@@ -26,30 +26,33 @@
 
     <!--Include our javascript file !-->
     <script type='text/javascript'>
-    var purge_url = '<?php echo $purge_url; ?>';
+    var purge_url = '<?php echo $zone_url; ?>';
     $(document).ready(function(){
 
-        $("#keycdn_purge_url").keyup(function (e) {
-            if ($.trim($("#keycdn_purge_url").val()).length > 0){
-                $(".purge_url").text($("#keycdn_purge_url").val())
+        $("#keycdn_purge_url").keyup(processUrl);
 
-                if ($("#submit_install").hasClass("disabled"))
-                    $("#submit_install").removeClass("disabled");
-
-            }else{
-                $("#submit_install").addClass("disabled");
-                $(".purge_url").text();
-            }
-
-        });
+        $('#keycdn_purge_url').focusout(processUrl);
+        
         //render click in new window
         $("#click_test").click(function(){
-            window.open( "http://"+purge_url + $(".purge_url").text());
+            window.open(purge_url + $(".purge_url").text());
             return false;
         })
 
     })
 
+    function processUrl(){
+        if ($.trim($("#keycdn_purge_url").val()).length > 0){
+            $(".purge_url").text($("#keycdn_purge_url").val())
+
+            if ($("#submit_install").hasClass("disabled"))
+                $("#submit_install").removeClass("disabled");
+
+        }else{
+            $("#submit_install").addClass("disabled");
+            $(".purge_url").text();
+        }
+    }
     </script>
 
 
