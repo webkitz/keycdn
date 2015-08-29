@@ -260,76 +260,53 @@ class keycdn extends module
     //@todo need to add pending|admin adding check currently auto provisions
 
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
-        //moved to manually adding service for now
 
-        /*
-        if ($status != "active")
-        return array(
-            //approval rows
-            array(
-                'key' => "keycdn_name",   //domain holder for this cdn
-                'value' => '',
-                'encrypted' => 0
-            ),
-            array(
-                'key' => "keycdn_domain",   //domain holder for this cdn
-                'value' => $vars['keycdn_domain'],
-                'encrypted' => 0
-            ),
-            array(
-                'key' => "keycdn_zone_id",   //zone id
-                'value' => '',
-                'encrypted' => 0
-            ),
-            array(
-                'key' => "keycdn_zone_url",   //zone id
-                'value' => '',
-                'encrypted' => 0
-            )
-        );*/
+
         //validate service
         $this->validateService($package, $vars);
 
-        //create zone on keycdn
-        $row = $this->getModuleRow($package->module_row);
-        $api = $this->api($row);
-
-
+        if ($this->Input->errors())
+            return;
         //check for http this should go in our validation
-
         $parsed = parse_url($vars['keycdn_domain']);
         if (empty($parsed['scheme'])) {
             $vars['keycdn_domain'] = 'http://' . ltrim($vars['keycdn_domain'], '/');
         }
         //generate keycdn name
         $vars['keycdn_name'] = $this->keyCDNName($vars['keycdn_domain']);
+        //DEFAULT
+        $vars['keycdn_zone_id'] = '';
 
+        if ($vars['use_module'] == "true") {
+            //create zone on keycdn
+            $row = $this->getModuleRow($package->module_row);
+            $api = $this->api($row);
 
-        $zone_details = array(
-            'name' => $vars['keycdn_name'],
-            'originurl' => $vars['keycdn_domain'],
-            'type' => 'pull'
-        );
+            $zone_details = array(
+                'name' => $vars['keycdn_name'],
+                'originurl' => $vars['keycdn_domain'],
+                'type' => 'pull'
+            );
 
-        //create zone
-        $response = $api->post('zones.json',$zone_details);
+            //create zone
+            $response = $api->post('zones.json', $zone_details);
 
-        //lets check for errors and return if so
-        $result = $this->parseResponse($response, $row);
+            //lets check for errors and return if so
+            $result = $this->parseResponse($response, $row);
 
-        if ($this->Input->errors())
-            return;
+            if ($this->Input->errors())
+                return;
 
-        //lets get list of zones
-        $response = $api->get('zones.json');
-        $zone_list = $this->parseResponse($response, $row);
-        //check for errors
-        if ($this->Input->errors())
-            return;
+            //lets get list of zones and get the zone id
+            $response = $api->get('zones.json');
+            $zone_list = $this->parseResponse($response, $row);
+            //check for errors
+            if ($this->Input->errors())
+                return;
 
-        //get the zone_id
-        $vars['keycdn_zone_id'] = $this->getZoneID($zone_list,$vars['keycdn_name']);
-
+            //get the zone_id
+            $vars['keycdn_zone_id'] = $this->getZoneID($zone_list, $vars['keycdn_name']);
+        }
         //
         return array(
             //approval rows
