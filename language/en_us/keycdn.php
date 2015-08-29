@@ -44,11 +44,11 @@ $lang['keycdn.!error.zone_id.empty'] = "Zone ID is Empty";
 $lang['keycdn.common.please_select'] = "-- Please Select --";
 
 //service_field
-$lang['keycdn.service_field.domain'] = "Domain name for CDN or ORIGIN URL";
-$lang['keycdn.service_field.name'] = "Zone Name (for your reference)";
+$lang['keycdn.service_field.domain'] = "Domain name or ORIGIN URL for CDN";
+$lang['keycdn.service_field.name'] = "Zone Name (for your reference) eg example";
 $lang['keycdn.service_field.purge'] = "Purge URL";
 $lang['keycdn.service_field.zone_id'] = "Zone ID";
-$lang['keycdn.service_field.zone_url'] = "Zone URL";
+$lang['keycdn.service_field.zone_url'] = "Zone URL eg. example-1015.kxcdn.com";
 $lang['keycdn.service_field.orgin_example'] = "<b>Example :</b><li>example.com</li> <li>example.com/my-folder/webapp/</li>";
 
 //client tabs

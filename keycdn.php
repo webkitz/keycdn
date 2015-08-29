@@ -257,7 +257,7 @@ class keycdn extends module
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
-    //@todo need to add pending|admin adding check currently auto provisions
+
 
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
 
@@ -267,6 +267,7 @@ class keycdn extends module
 
         if ($this->Input->errors())
             return;
+
         //check for http this should go in our validation
         $parsed = parse_url($vars['keycdn_domain']);
         if (empty($parsed['scheme'])) {
@@ -864,7 +865,49 @@ class keycdn extends module
      * @return ModuleFields A ModuleFields object, containg the fields to render as well as any additional HTML markup to include
      */
     public function getAdminAddFields($package, $vars=null) {
-        return new ModuleFields();
+        //generate admin view to add service
+        Loader::loadHelpers($this, array("Form", "Html"));
+
+        $fields = new ModuleFields();
+
+        //keycdn_name
+
+        //zone
+        $fields->label(Language::_("keycdn.service_field.zone_id", true), "keycdn_zone_id");
+
+        $fields->fieldText("keycdn_zone_id",
+            $this->Html->ifSet($vars->keycdn_zone_id),
+            array('id'=>"keycdn_zone_id", 'class'=>"form-control"));
+
+        //zone name
+        $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
+        $keycdn_name->attach($fields->fieldText("keycdn_name",
+            $this->Html->ifSet($vars->keycdn_name),
+            array('id'=>"keycdn_name", 'class'=>"form-control")));
+        $fields->setField($keycdn_name);
+
+        //zone url
+        $keycdn_zone_url = $fields->label(Language::_("keycdn.service_field.zone_url", true), "keycdn_zone_url");
+        $keycdn_zone_url->attach($fields->fieldText("keycdn_zone_url",
+            $this->Html->ifSet($vars->keycdn_zone_url),
+            array('id'=>"keycdn_zone_url", 'class'=>"form-control")));
+        $fields->setField($keycdn_zone_url);
+
+        //zone orginal url
+        $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
+        $keycdn_domain->attach($fields->fieldText("keycdn_domain",
+            $this->Html->ifSet($vars->keycdn_domain),
+            array('id'=>"keycdn_domain", 'class'=>"form-control")));
+        $fields->setHtml("
+            <div class=\"alert alert-info\">".Language::_("keycdn.service_field.orgin_example",true)."</div>
+        ");
+        $fields->setField($keycdn_domain);
+        //unset for namesake
+        unset($keycdn_name);
+        unset($keycdn_domain);
+        unset($keycdn_zone_url);
+
+        return $fields;
     }
 
     /**
@@ -890,7 +933,7 @@ class keycdn extends module
         $fields->setField($keycdn_domain);
         //unset
         unset($keycdn_domain);
-        unset($keycdn_name);
+
 
         return $fields;
     }
