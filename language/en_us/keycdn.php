@@ -48,6 +48,7 @@ $lang['keycdn.service_field.domain'] = "Domain name for CDN or ORGIN URL";
 $lang['keycdn.service_field.name'] = "Zone Name (for your reference)";
 $lang['keycdn.service_field.purge'] = "Purge URL";
 $lang['keycdn.service_field.zone_id'] = "Zone ID";
+$lang['keycdn.service_field.zone_url'] = "Zone URL";
 
 //client tabs
 $lang['keycdn.tab.client.manage'] = "Manage CDN";

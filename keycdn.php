@@ -267,6 +267,11 @@ class keycdn extends module
                 'key' => "keycdn_zone_id",   //zone id
                 'value' => '',
                 'encrypted' => 0
+            ),
+            array(
+                'key' => "keycdn_zone_url",   //zone id
+                'value' => '',
+                'encrypted' => 0
             )
         );
         /*&
@@ -385,8 +390,15 @@ class keycdn extends module
                'key' => "keycdn_zone_id",
                'value' => $serviceFromVar['keycdn_zone_id'],
                'encrypted' => 0
+           ),
+
+           array(
+               'key' => "keycdn_zone_url",
+               'value' => $serviceFromVar['keycdn_zone_url'],
+               'encrypted' => 0
            )
         );
+
     }
 
 
@@ -868,9 +880,11 @@ class keycdn extends module
 		");*/
         //create client form
         //keycdn_name
+        //chanding name to client order number
         $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
         $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($vars->keycdn_name), array('id' => "keycdn_name")));
         $fields->setField($keycdn_name);
+
         //domain name
         $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
         $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($vars->keycdn_domain), array('id' => "keycdn_domain")));
@@ -946,13 +960,14 @@ class keycdn extends module
         if (isset($postRequest) && count($postRequest) > 0){
                 //preload service
                 Loader::loadModels($this, array("Services"));
-                //setup vars to pass
+                //setup vars to pass only pass writeable vars
                 $vars = array(
                     'use_module' => true,
-                    'client_id' => $service->client_id,
+                    'client_id' => $service->client_id,     //read only
                     'keycdn_domain' => $postRequest['keycdn_domain'],
                     'keycdn_name' => $postRequest['keycdn_name'],
-                    'keycdn_zone_id' => $postRequest['keycdn_zone_id']
+                    'keycdn_zone_id' => $postRequest['keycdn_zone_id'],
+                    'keycdn_zone_url' => $postRequest['keycdn_zone_url'],
                 );
                 //check service
                 $updated_details = $this->editService($package, $service, $vars);

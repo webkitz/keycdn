@@ -18,11 +18,16 @@
             $this->Form->fieldText("keycdn_name",
                 $this->Html->ifSet($client->keycdn_name),
                 array('id'=>"keycdn_name", 'class'=>"form-control"));
-            //domain/purge url
+            //zone orginal url
             $this->Form->label($this->_("keycdn.service_field.domain", true), "keycdn_domain");
             $this->Form->fieldText("keycdn_domain",
                 $this->Html->ifSet($client->keycdn_domain),
                 array('id'=>"keycdn_domain", 'class'=>"form-control"));
+            //zone url
+            $this->Form->label($this->_("keycdn.service_field.zone_url", true), "keycdn_zone_url");
+            $this->Form->fieldText("keycdn_zone_url",
+                $this->Html->ifSet($client->keycdn_zone_url),
+                array('id'=>"keycdn_zone_url", 'class'=>"form-control"));
 
             ?>
         </div>
