@@ -1064,6 +1064,69 @@ class keycdn extends module
     }
 
     /**
+     * Client CDN Stats tab
+     *
+     * @param stdClass $package A stdClass object representing the current package
+     * @param stdClass $service A stdClass object representing the current service
+     * @param array $get Any GET parameters
+     * @param array $post Any POST parameters
+     * @param array $files Any FILES parameters
+     * @return string The string representing the contents of this tab
+     */
+    public function tabClientStats($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
+    {
+        //get service fields
+        $service_fields = $this->serviceFieldsToObject($service->fields);
+
+        //lets try purge url
+        $row = $this->getModuleRow($package->module_row);
+        $api = $this->api($row);
+
+        $prams = array(
+            "start" =>  strtotime("-30 day", time()),       //get last 30days
+            "end" => time(),                                //up to today
+            "zone_id" => $service_fields->keycdn_zone_id
+        );
+        //lets get stats
+        //$response = $api->get('reports/traffic.json',  $prams);
+
+        //$_SESSION['response'] = $response;
+        $response = $_SESSION['response'];
+
+        $result = $this->parseResponse($response, $row);
+
+        $stats = array();
+        if (isset($result['data']['stats'])){
+            $dataStats = $result['data']['stats'];
+            foreach($dataStats as $stat){
+                $stat['used'] = $this->bytesToSize($stat['amount']);        //convert byte to readable traffic
+                $stat['timestamp'] = date('D d/m/Y', $stat['timestamp']);   //tidyup timestamp
+                $stats[] = $stat;
+            }
+
+        }
+        //if no stats return
+        if (count($stats) <= 0)
+            return "Sorry no stats to render";
+
+        $this->view = new View("tab_client_stats", "default");
+
+        $this->view->base_uri = $this->base_uri;
+        // Load the helpers required for this view
+        Loader::loadHelpers($this, array("Html"));
+
+
+        //pass requirements to view
+        $this->view->set("stats", json_encode($stats));
+
+        $this->view->set("view", $this->view->view);
+        $this->view->setDefaultView("components" . DS . "modules" . DS . "keycdn" . DS);
+
+        return $this->view->fetch();
+
+
+    }
+    /**
      * Client Manage tab
      *
      * @param stdClass $package A stdClass object representing the current package
@@ -1079,7 +1142,6 @@ class keycdn extends module
 
 
         //Get the service fields
-        /*stdClass Object ( [keycdn_domain] => screepts.com [keycdn_name] => screepts [keycdn_zone_id] => 14932 )*/
         $service_fields = $this->serviceFieldsToObject($service->fields);
 
 
@@ -1119,25 +1181,13 @@ class keycdn extends module
 
         return $this->view->fetch();
     }
+
     /**
-     * Client Stats tab
+     * Our singleton of keycdn api
      *
-     * @param stdClass $package A stdClass object representing the current package
-     * @param stdClass $service A stdClass object representing the current service
-     * @param array $get Any GET parameters
-     * @param array $post Any POST parameters
-     * @param array $files Any FILES parameters
-     * @return string The string representing the contents of this tab
+     * @param bool|false $module_row
+     * @return bool|KeyCDNApi
      */
-    public function tabClientStats($package, $service, array $getRequest = null, array $postRequest = null, array $files = null)
-    {
-        $this->view->base_uri = $this->base_uri;
-        // Load the helpers required for this view
-        Loader::loadHelpers($this, array("Form", "Html"));
-        //Get the service fields
-        $service_fields = $this->serviceFieldsToObject($service->fields);
-        $row = $this->getModuleRow($package->module_row);
-    }
     private function api($module_row = false)
     {
         //singleton
@@ -1252,7 +1302,37 @@ class keycdn extends module
 
         return $response;
     }
+    /**
+     * Convert bytes to human readable format
+     *
+     * @param integer bytes Size in bytes to convert
+     * @return string
+     */
+    private function bytesToSize($bytes, $precision = 2)
+    {
+        $kilobyte = 1024;
+        $megabyte = $kilobyte * 1024;
+        $gigabyte = $megabyte * 1024;
+        $terabyte = $gigabyte * 1024;
 
+        if (($bytes >= 0) && ($bytes < $kilobyte)) {
+            return $bytes . ' B';
+
+        } elseif (($bytes >= $kilobyte) && ($bytes < $megabyte)) {
+            return round($bytes / $kilobyte, $precision) . ' KB';
+
+        } elseif (($bytes >= $megabyte) && ($bytes < $gigabyte)) {
+            return round($bytes / $megabyte, $precision) . ' MB';
+
+        } elseif (($bytes >= $gigabyte) && ($bytes < $terabyte)) {
+            return round($bytes / $gigabyte, $precision) . ' GB';
+
+        } elseif ($bytes >= $terabyte) {
+            return round($bytes / $terabyte, $precision) . ' TB';
+        } else {
+            return $bytes . ' B';
+        }
+    }
 
 
 
