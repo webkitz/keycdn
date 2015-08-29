@@ -1108,7 +1108,7 @@ class keycdn extends module
         //pass requirements to view
         $this->view->set("service_id", $service->id);
 
-        $this->view->set("purged_url", (isset($purged_url))?$purged_url:"");
+        $this->view->set("purged_url", (isset($purged_url) && isset($purged_url['path']) )?$purged_url['path']:"");
 
 
         //trim the cdn domain and add slash

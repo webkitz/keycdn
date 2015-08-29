@@ -52,10 +52,12 @@ $lang['keycdn.service_field.zone_url'] = "Zone URL";
 $lang['keycdn.service_field.orgin_example'] = "<b>Example :</b><li>example.com</li> <li>example.com/my-folder/webapp/</li>";
 
 //client tabs
-$lang['keycdn.tab.client.manage'] = "Manage CDN";
+$lang['keycdn.tab.client.manage'] = "Purge CDN";
 $lang['keycdn.tab.client.stats'] = "CDN Stats";
 
 //admin tabs
 $lang['keycdn.tab.admin.settings'] = "CDN Settings";
 
+//tab_client_manage
+$lang['keycdn.tab.client_manage.cleared'] = "<h5>Cleared the following from cache</h5>";
 ?>

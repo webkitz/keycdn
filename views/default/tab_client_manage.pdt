@@ -5,9 +5,22 @@
     <div id="blestaLoader"></div>
 
     <div id="csr_content" class="form-group">
+        <?php
+        if (isset($purged_url)){
+            ?>
+            <div class="form-group">
+                <h5>
+                    <p>
+                        <?php $this->_("keycdn.tab.client_manage.cleared"); ?> <a target="_blank" href="http://<?php echo $purged_url;?>"><?php echo $purged_url;?></a>
+                    </p>
+
+                </h5>
+            </div>
+            <?php
+        }
+        ?>
         <div class="form-group">
             <?php
-        
             $this->Form->fieldHidden("keycdn_zone_url","true");
             $this->Form->label($purge_url, "keycdn_purge");
             $this->Form->fieldText("keycdn_purge_url",
