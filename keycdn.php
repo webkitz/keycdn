@@ -1068,13 +1068,17 @@ class keycdn extends module
             "end" => time(),                                //up to today
             "zone_id" => $service_fields->keycdn_zone_id
         );
-        //lets get stats
-        //$response = $api->get('reports/traffic.json',  $prams);
 
-        //$_SESSION['response'] = $response;
-        $response = $_SESSION['response'];
+        //lets get stats if non store in session
+        $response =  (isset($_SESSION['cdn_stats']) && !empty($_SESSION['cdn_stats'])  )? $_SESSION['cdn_stats']  : $api->get('reports/traffic.json',  $prams);
 
         $result = $this->parseResponse($response, $row);
+
+        //check for any errors
+        if ($this->Input->errors())
+            return;
+        //store results as they have been successful
+        $_SESSION['cdn_stats'] = $response;
 
         $stats = array();
         if (isset($result['data']['stats'])){
