@@ -36,7 +36,7 @@ $lang['keycdn.!error.api_key.empty'] = "API key is empty";
 $lang['keycdn.!error.api_key.invalid'] = "API Key is invalid";
 $lang['keycdn.!error.api.internal']= "API Call Error";
 $lang['keycdn.!error.account_name.empty'] = "Account Name is Empty";
-$lang['keycdn.!error.domain.format'] = "Incorrect Domain Format";
+$lang['keycdn.!error.domain.format'] = "Incorrect Domain/ORIGIN Url Format ";
 $lang['keycdn.!error.zone_id.empty'] = "Zone ID is Empty";
 
 
@@ -44,11 +44,12 @@ $lang['keycdn.!error.zone_id.empty'] = "Zone ID is Empty";
 $lang['keycdn.common.please_select'] = "-- Please Select --";
 
 //service_field
-$lang['keycdn.service_field.domain'] = "Domain name for CDN or ORGIN URL";
+$lang['keycdn.service_field.domain'] = "Domain name for CDN or ORIGIN URL";
 $lang['keycdn.service_field.name'] = "Zone Name (for your reference)";
 $lang['keycdn.service_field.purge'] = "Purge URL";
 $lang['keycdn.service_field.zone_id'] = "Zone ID";
 $lang['keycdn.service_field.zone_url'] = "Zone URL";
+$lang['keycdn.service_field.orgin_example'] = "<b>Example :</b><li>example.com</li> <li>example.com/my-folder/webapp/</li>";
 
 //client tabs
 $lang['keycdn.tab.client.manage'] = "Manage CDN";

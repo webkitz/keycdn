@@ -199,7 +199,9 @@ class keycdn extends module
      * @param array $vars An array of user supplied info to satisfy the request
      * @return boolean True if the service validates, false otherwise. Sets Input errors when false.
      */
-    public function validateService($package, array $vars=null) {
+    //@todo add validation of domain may need to check http etc.
+    public function validateService($package, array $vars=null , $editService = false) {
+
         // Set rules
         $rules = array(
             'keycdn_domain' => array(
@@ -225,6 +227,12 @@ class keycdn extends module
             )
         );
 
+        //if we are not editing but adding service we need to void some of these rules as we only want the domain/orgin url
+        if (!$editService){
+            unset($rules['keycdn_name']);
+            unset($rules['keycdn_zone_id']);
+        }
+
         $this->Input->setRules($rules);
         return $this->Input->validates($vars);
     }
@@ -249,13 +257,18 @@ class keycdn extends module
      * @see Module::getModule()
      * @see Module::getModuleRow()
      */
+    //@todo need to add pending|admin adding check currently auto provisions
+    
     public function addService($package, array $vars=null, $parent_package=null, $parent_service=null, $status="pending") {
         //moved to manually adding service for now
+
+        /*
+        if ($status != "active")
         return array(
             //approval rows
             array(
                 'key' => "keycdn_name",   //domain holder for this cdn
-                'value' => $vars['keycdn_name'],
+                'value' => '',
                 'encrypted' => 0
             ),
             array(
@@ -273,8 +286,7 @@ class keycdn extends module
                 'value' => '',
                 'encrypted' => 0
             )
-        );
-        /*&
+        );*/
         //validate service
         $this->validateService($package, $vars);
 
@@ -282,23 +294,43 @@ class keycdn extends module
         $row = $this->getModuleRow($package->module_row);
         $api = $this->api($row);
 
+
+        //check for http this should go in our validation
+
+        $parsed = parse_url($vars['keycdn_domain']);
+        if (empty($parsed['scheme'])) {
+            $vars['keycdn_domain'] = 'http://' . ltrim($vars['keycdn_domain'], '/');
+        }
+        //generate keycdn name
+        $vars['keycdn_name'] = $this->keyCDNName($vars['keycdn_domain']);
+
+
         $zone_details = array(
             'name' => $vars['keycdn_name'],
-            'originurl' => 'http://'.$vars['keycdn_domain'],
+            'originurl' => $vars['keycdn_domain'],
             'type' => 'pull'
         );
-        $response = $api->post('zones.json',$zone_details);
+
+        //create zone
+        //$response = $api->post('zones.json',$zone_details);
 
         //lets check for errors and return if so
-        $result = $this->parseResponse($response, $row);
+        //$result = $this->parseResponse($response, $row);
 
         if ($this->Input->errors())
             return;
 
+        //lets get list of zones
+        $response = $api->get('zones.json');
+        $zone_list = $this->parseResponse($response, $row);
+        //check for errors
+        if ($this->Input->errors())
+            return;
 
         //get the zone_id
-        //$zone_id = $result->data->zone->id;
+        $vars['keycdn_zone_id'] = $this->getZoneID($zone_list,$vars['keycdn_name']);
 
+        //
         return array(
             //approval rows
             array(
@@ -313,11 +345,11 @@ class keycdn extends module
             ),
             array(
                 'key' => "keycdn_zone_id",   //zone id
-                'value' => '14932',
+                'value' => $vars['keycdn_zone_id'],
                 'encrypted' => 0
             )
         );
-        */
+
     }
 
     /**
@@ -862,7 +894,7 @@ class keycdn extends module
      */
     public function getClientAddFields($package, $vars=null) {
         //for now we are manually adding this packahe in so will not be requesting any client fields
-        return new ModuleFields();
+
         Loader::loadHelpers($this, array("Form", "Html"));
         //We are just going to get domain name we want CDN service for
         $fields = new ModuleFields();
@@ -881,13 +913,17 @@ class keycdn extends module
         //create client form
         //keycdn_name
         //chanding name to client order number
+        /*
         $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
         $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($vars->keycdn_name), array('id' => "keycdn_name")));
         $fields->setField($keycdn_name);
-
+        */
         //domain name
         $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
         $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($vars->keycdn_domain), array('id' => "keycdn_domain")));
+        $fields->setHtml("
+            <div class=\"alert alert-info\">".Language::_("keycdn.service_field.orgin_example",true)."</div>
+        ");
         $fields->setField($keycdn_domain);
         //unset
         unset($keycdn_domain);
@@ -1104,6 +1140,33 @@ class keycdn extends module
     }
 
     /**
+     * @param $domain domain name or possible url
+     * @return string safe string as keycdn name as refrence
+     */
+    private function keyCDNName($domain){
+        //generate name
+        $domain = preg_replace('#^https?://#', '', $domain);
+        $domain = preg_replace("/[^A-Za-z0-9 ]/", '', $domain);
+
+        return trim($domain);
+    }
+
+    /**
+     * @param $response | response from keycdn get->list of all zones
+     * @param $keyCDNName | name we are locating the id
+     * @return bool | int , returns false if value not found or the id of the zone.
+     */
+    private function getZoneID($response,$keyCDNName){
+        $zones = (isset($response['data']) && isset($response['data']['zones']) && count($response['data']['zones']) > 0) ? $response['data']['zones'] : false;
+
+        if ($zones != false)
+            foreach($zones as $zone){
+                if ($zone['name'] == $keyCDNName) return $zone['id'];
+            }
+
+        return false;
+    }
+    /**
      * Parses the response from API into an stdClass object
      *
      * @param mixed $response The response from the API
@@ -1120,8 +1183,9 @@ class keycdn extends module
             $module_row = $this->getModuleRow();
 
         $success = true;
+        $response = json_decode($response,true);
 
-        if (empty($response) || !empty($response['error']) || (!empty($response['status'])) && $response['status'] == "error") {
+        if (empty($response) || (!empty($response['status']) && $response['status'] == "error")) {
             $success = false;
             $error = (isset($response['description'])) ? $response['description'] : Language::_("keycdn.!error.api.internal", true);
 
@@ -1134,14 +1198,16 @@ class keycdn extends module
                         )
                     )
                 );
+
             //$this->Input->setErrors(array('errors' => $error));
 
 
             //$this->Input->setErrors(array('api' => array('internal' => $error)));
 
-        }
 
+        }
         $this->log($module_row->meta->account_name, serialize($response), "output", $success);
+
 
         if (!$success && !$ignore_error)
             return;
