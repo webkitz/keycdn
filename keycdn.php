@@ -901,28 +901,9 @@ class keycdn extends module
         //for now we are manually adding this packahe in so will not be requesting any client fields
 
         Loader::loadHelpers($this, array("Form", "Html"));
-        //We are just going to get domain name we want CDN service for
+        //We are just going to get domain name we want for CDN service for
         $fields = new ModuleFields();
-        /*
-        $fields->setHtml("
-			<script type=\"text/javascript\">
-                $(document).ready(function() {
-                    $('#keycdn_domain').change(function() {
-						var form = $(this).closest('form');
-						$(form).append('<input type=\"hidden\" name=\"refresh_fields\" value=\"true\">');
-						$(form).submit();
-					});
-                });
-			</script>
-		");*/
-        //create client form
-        //keycdn_name
-        //chanding name to client order number
-        /*
-        $keycdn_name = $fields->label(Language::_("keycdn.service_field.name", true), "keycdn_name");
-        $keycdn_name->attach($fields->fieldText("keycdn_name", $this->Html->ifSet($vars->keycdn_name), array('id' => "keycdn_name")));
-        $fields->setField($keycdn_name);
-        */
+
         //domain name
         $keycdn_domain = $fields->label(Language::_("keycdn.service_field.domain", true), "keycdn_domain");
         $keycdn_domain->attach($fields->fieldText("keycdn_domain", $this->Html->ifSet($vars->keycdn_domain), array('id' => "keycdn_domain")));
@@ -1286,12 +1267,6 @@ class keycdn extends module
                         )
                     )
                 );
-
-            //$this->Input->setErrors(array('errors' => $error));
-
-
-            //$this->Input->setErrors(array('api' => array('internal' => $error)));
-
 
         }
         $this->log($module_row->meta->account_name, serialize($response), "output", $success);
