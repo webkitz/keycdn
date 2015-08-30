@@ -59,5 +59,8 @@ $lang['keycdn.tab.client.stats'] = "CDN Stats";
 $lang['keycdn.tab.admin.settings'] = "CDN Settings";
 
 //tab_client_manage
-$lang['keycdn.tab.client_manage.cleared'] = "<h5>Cleared the following from cache</h5>";
+$lang['keycdn.tab.client_manage.cleared'] = "Cleared the following from cache";
+$lang['keycdn.tab.client_manage.purge_button'] = "Purge Cache";
+$lang['keycdn.tab.client_manage.help'] = "Enter the URL path to purge from CDN";
+
 ?>

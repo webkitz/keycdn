@@ -6,7 +6,7 @@
 
     <div id="csr_content" class="form-group">
         <?php
-        if (isset($purged_url)){
+        if (isset($purged_url) && !empty($purged_url)){
             ?>
             <div class="form-group">
                 <h5>
@@ -20,6 +20,7 @@
         }
         ?>
         <div class="form-group">
+            <h4><?php $this->_("keycdn.tab.client_manage.help"); ?></h4>
             <?php
             $this->Form->fieldHidden("keycdn_zone_url","true");
             $this->Form->label($purge_url, "keycdn_purge");
@@ -33,7 +34,9 @@
         </div>
 
     </div>
-    <button id="submit_install" class="btn btn-warning pull-right disabled">Purge Cache</button>
+    <button id="submit_install" class="btn btn-warning pull-right disabled">
+        <?php $this->_("keycdn.tab.client_manage.purge_button"); ?>
+    </button>
     <?php $this->Form->end();
     ?>
 
