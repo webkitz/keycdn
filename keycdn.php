@@ -22,7 +22,7 @@ class keycdn extends module
     /**
      * @var string The version of this module
      */
-    private static $version = "0.1.3";
+    private static $version = "0.1.4";
     /**
      * @var string The authors of this module
      */
@@ -56,8 +56,6 @@ class keycdn extends module
         Language::loadLang("keycdn", null, dirname(__FILE__) . DS . "language" . DS);
 
         //added error reporting internally
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
     }
 
     /**
@@ -1157,11 +1155,10 @@ class keycdn extends module
             $api = $this->api($row);
 
             //keycdn_zone_url
-            $purged_url = array(
-                'path' => $this->purgeURL($service_fields,$postRequest["keycdn_purge_url"])
-            );
+            $response = $api->delete('zones/purgeurl/'.$service_fields->keycdn_zone_id.'.json', array(
+                'urls' =>  array($this->purgeURL($service_fields,$postRequest["keycdn_purge_url"])),
+            ));
 
-            $response = $api->delete('zones/purgeurl/'.$service_fields->keycdn_zone_id.'.json',   $purged_url);
             $result = $this->parseResponse($response, $row);
 
         }

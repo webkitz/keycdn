@@ -55,11 +55,11 @@
             return false;
         })
 
-    })
+    });
 
     function processUrl(){
         if ($.trim($("#keycdn_purge_url").val()).length > 0){
-            $(".purge_url").text($("#keycdn_purge_url").val())
+            $(".purge_url").text($("#keycdn_purge_url").val());
 
             if ($("#submit_install").hasClass("disabled"))
                 $("#submit_install").removeClass("disabled");
